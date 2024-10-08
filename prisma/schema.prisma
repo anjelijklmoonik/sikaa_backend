@@ -83,7 +83,6 @@ model Absensi {
   id              Int            @id @default(autoincrement())
   tanggal         DateTime
   status          String
-  stedentProfilId Int
   studentProfil   StudentProfil? @relation(fields: [studentProfilId], references: [id])
   studentProfilId Int?
 }
@@ -119,7 +118,6 @@ model MapelUmum {
 }
 
 //---------------------------------------------------------------------------------------------------------------//
-
 model MapelJurusan {
   id              Int            @id @default(autoincrement())
   namaMapel       String
@@ -128,7 +126,6 @@ model MapelJurusan {
 }
 
 //---------------------------------------------------------------------------------------------------------------//
-
 enum Role {
   STUDENT
   ADMIN
