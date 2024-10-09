@@ -13,10 +13,11 @@ app.post('/studentProfil', async (c) => {
 
   try {
     const newProfil = await prisma.studentProfil.create ({
-      data: { foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl: new Date(ttl), noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear: {connect: {id: academicYear}}}
+      data: { foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl: new Date(ttl), noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear: {connect: {id: academicYear.toString()}}}
     })
     return c.json(newProfil, 201);
   } catch (error) {
+    console.error(error)
     return c.json({error: "Profil baru tidak bisa dibuat"}, 400);
   }
 });
@@ -82,13 +83,14 @@ app.delete('studentProfil/:id', async (c) => {
 //======================================================= ACADEMIC YEAR =======================================================//
 // CREATE
 app.post('/academicYear', async (c) => {
-  const { year, StudentProfil} = await c.req.json();
+  const { year} = await c.req.json();
   try {
     const newYear = await prisma.academicYear.create ({
-      data: {year, StudentProfil: {connect: {id: StudentProfil}}}
+      data: {year}
     })
     return c.json(newYear, 201);
   } catch (error) {
+    console.error(error)
     return c.json ({ error: "Tahun akademik baru tidak bisa dibuat"}, 400)
   }
 });
@@ -108,7 +110,7 @@ app.get('/academicYear/:id', async (c) => {
   const id = String(c.req.param('id'));
   try {
     const academicYear = await prisma.academicYear.findUnique({
-      where: {id: ""}
+      where: {id}
     })
     if (academicYear) {
       return c.json (academicYear);
@@ -124,11 +126,11 @@ app.get('/academicYear/:id', async (c) => {
 // UPDATE
 app.put ('/academicYear/:id', async (c) => {
   const id = String(c.req.param('id'));
-  const {year, StudentProfil} = await c.req.json();
+  const {year} = await c.req.json();
   try {
     const updateAcademicYear = await prisma.academicYear.update({
-      where: {id : ""},
-      data: {year, StudentProfil}
+      where: {id},
+      data: {year}
     })
     return c.json(updateAcademicYear);
   } catch (error) {
@@ -141,11 +143,13 @@ app.put ('/academicYear/:id', async (c) => {
 app.delete('/academicYear/:id', async (c) => {
   const id = String (c.req.param('id'));
   try {
+    
     await prisma.academicYear.delete({
-      where: {id: ""}
+      where: {id}
     });
     return c.json ({message: "Pengahapusan berhasil"});
   } catch (error) {
+    console.error(error)
     return c.json ({error: "Pengahapusan gagal"}, 400)
   }
 });
@@ -160,6 +164,7 @@ app.post('/keuangan', async (c) => {
     })
     return c.json(newKeuangan, 201);
   } catch (error) {
+    console.error(error)
     return c.json({error: "Keuangan baru tidak bisa dibuat"}, 400);
   }
 });
