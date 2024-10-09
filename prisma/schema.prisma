@@ -45,7 +45,7 @@ model StudentProfil {
   absensiId      Int?           @unique
   nilaiId        Int?           @unique
   nilai          Nilai?         @relation(fields: [nilaiId], references: [id])
-  pencapaian     Pencapaian?
+  pencapaian     Pencapaian?    @relation(fields: [pencapaianId], references: [id])
   pencapaianId   Int?           @unique
   mapelUmum      MapelUmum[]
   mapelJurusan   MapelJurusan[]
@@ -57,13 +57,13 @@ model StudentProfil {
 //---------------------------------------------------------------------------------------------------------------//
 
 model Keuangan {
-  id              Int            @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   lastBalance     Float
   lastTransaction Float
   lastTransDate   DateTime
   studentProfilId Int
   deskripsi       String
-  studentProfil   StudentProfil? @relation
+  studentProfil   StudentProfil[] @relation
 }
 
 //---------------------------------------------------------------------------------------------------------------//
@@ -83,32 +83,32 @@ model Keuangan {
 //---------------------------------------------------------------------------------------------------------------//
 
 model Absensi {
-  id              Int            @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   tanggal         DateTime
   status          String
-  studentProfil   StudentProfil? @relation
+  studentProfil   StudentProfil[] @relation
   studentProfilId Int?
 }
 
 //---------------------------------------------------------------------------------------------------------------//
 
 model Nilai {
-  id              Int            @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   skor            Float
   pelajaran       String
-  studentProfil   StudentProfil? @relation
+  studentProfil   StudentProfil[] @relation
   studentProfilId Int
 }
 
 //---------------------------------------------------------------------------------------------------------------//
 
 model Pencapaian {
-  id              Int           @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   judul           String
   deskripsi       String
   tanggal         DateTime
-  studentProfil   StudentProfil @relation(fields: [studentProfilId], references: [id])
-  studentProfilId Int           @unique // Menambahkan @unique di sini
+  studentProfil   StudentProfil[] @relation
+  studentProfilId Int
 }
 
 //---------------------------------------------------------------------------------------------------------------//

@@ -260,11 +260,12 @@ app.get('/absensi/:id', async (c) => {
       where: {id}
     });
     if (absensi) {
-      return c.json({error: "Absensi tidak terbaca"}, 404)
+      return c.json(absensi)
     } else {
       return c.json ({error: "Error membaca data"}, 500)
     }
   } catch (error) {
+    console.error(error)
     return c.json ({error: "Error membaca data"}, 500)
   }
 });
@@ -332,11 +333,12 @@ app.get('/nilai/:id', async (c) => {
       where: {id}
     });
     if (nilai) {
-      return c.json({error: "Nilai tidak terbaca"}, 404)
+      return c.json(nilai)
     } else {
       return c.json ({error: "Error membaca data"}, 500)
     }
   } catch (error) {
+    console.error(error)
     return c.json({error: "Error membaca data"}, 500)
   }
 });
@@ -404,7 +406,7 @@ app.get('/pencapaian/:id', async (c) => {
       where: {id}
     });
     if (pencapaian) {
-      return c.json({error: "Nilai tidak terbaca"}, 404)
+      return c.json(pencapaian)
     } else {
       return c.json ({error: "Error membaca data"}, 500)
     }
@@ -454,6 +456,7 @@ app.post('/mapelUmum', async (c) => {
     });
     return c.json(newMapelUmum, 201);
   } catch (error) {
+    console.error(error)
     return c.json({error: "Mata pelajaran baru tidak bisa dibuat"}, 400)
   }
 });
@@ -476,7 +479,7 @@ app.get('/mapelUmum/:id', async (c) => {
       where: {id}
     });
     if (mapelUmum) {
-      return c.json({error: "Mapel umum tidak terbaca"}, 404)
+      return c.json(mapelUmum)
     } else {
       return c.json({error: "Error membaca data"}, 500)
     }
@@ -548,7 +551,7 @@ app.get('/mapelJurusan/:id', async (c) => {
       where: {id}
     });
     if (mapelJurusan) {
-      return c.json({error: "Mapel umum tiddak terbaca"}, 404)
+      return c.json(mapelJurusan)
     } else {
       return c.json({error: "Error membaca data"}, 500)
     }
