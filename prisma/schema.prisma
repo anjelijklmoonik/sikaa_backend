@@ -136,10 +136,10 @@ enum Role {
 }
 
 model Users {
-  id              Int           @id @default(autoincrement())
+  id              Int            @id @default(autoincrement())
   username        String
   password        String
-  studentProfilId Int
-  studentProfil   StudentProfil @relation(fields: [studentProfilId], references: [id])
+  studentProfilId Int?
+  studentProfil   StudentProfil? @relation(fields: [studentProfilId], references: [id])
   role            Role?
 }

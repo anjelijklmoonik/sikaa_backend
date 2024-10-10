@@ -1,11 +1,25 @@
 const prisma = new PrismaClient
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import { connect } from 'bun';
-import { Hono } from 'hono'
+import { Hono, Next } from 'hono'
+import { Context, useId } from 'hono/jsx';
+import type { Context as HonoContext } from 'hono';
 
 const app = new Hono()
 
 // ===================================================================================================================================================================================================== //
+//======================================================= MIDDLEWARE ADMIN ONLY =======================================================//
+const adminOnly = async (c: HonoContext, next: Next) => {
+  const userRole = c.req.header('user-role');
+  console.log('User Role:', userRole);
+  if (userRole?.toUpperCase() !== 'ADMIN') {
+    return c.json({error: "Admin ditolak"}, 403);
+  }
+  await next();
+}
+
+// ===================================================================================================================================================================================================== //
+
 //======================================================= STUDENT PROFIL =======================================================//
 // CREATE
 app.post('/studentProfil', async (c) => {
@@ -556,7 +570,7 @@ app.get('/mapelJurusan/:id', async (c) => {
       return c.json({error: "Error membaca data"}, 500)
     }
   }catch (error) {
-    return c.json({error: "Error membadca data"}, 500)
+    return c.json({error: "Error membaca data"}, 500)
   }
 });
 
@@ -591,6 +605,151 @@ app.delete('/mapelJurusan/:id', async (c) => {
 });
 
 
+//======================================================= USERS =======================================================//
+// CREATE admin only
+app.post('/admin', adminOnly, async (c: HonoContext) => {
+    const {username, password} = await c.req.json();
+    if (!username || !password) {
+      return c.json({error: "Password atau Username tidak dimasukkan"}, 400)
+    }
+    try {
+      const newAdmin = await prisma.users.create({
+        data: {username, password, role: 'ADMIN'}
+      });
+      return c.json(newAdmin, 201);
+  } catch (error) {
+    console.error(error);
+    return c.json({error: "Admin tidak bisa dibuat"}, 400)
+  }
+});
+// CREATE users
+app.post('/users', async (c) => {
+  const {username, password, role, studentProfilId} = await c.req.json();
+  if (role !== 'STUDENT' && role !== 'ORANGTUA') {
+    return c.json({error: 'Role salah'}, 400)
+  }
+  const userData: any = {
+    username, password, role: role === 'ORANGTUA'? Role.ORANGTUA : role === 'STUDENT'? Role.STUDENT: Role}
+  if (role === 'STUDENT') {
+    if (!studentProfilId) {
+      return c.json({error: "Student harus memiliki Student ID"})
+    }
+    userData.studentProfilId = studentProfilId;
+  } 
+
+  try {
+      const newUser = await prisma.users.create({
+        data: userData,
+      });
+      return c.json(newUser, 201);
+  } catch (error) {
+    console.error(error);
+    return c.json({error: "Tidak bisa membuat user baru"}, 400)
+  }
+});
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
+// READ all
+app.get('/users', async (c: HonoContext) => {
+  try {
+    const users = await prisma.users.findMany();
+    return c.json(users, 200);
+  } catch (error) {
+    console.error(error);
+    return c.json({error: "Error membaca user"}, 500);
+  }
+});
+// READ one
+app.get('/users/:id', async(c: HonoContext) => {
+  const id = Number(c.req.param('id'));
+  try {
+    const users = await prisma.users.findUnique({
+      where: {id},
+    });
+    if (!users) {
+      return c.json({error: "User tidak bisa terbaca"}, 404);
+    }
+    return c.json(users, 200);
+  } catch (error) {
+    console.error(error);
+    return c.json({error: "Tidak bisa membaca user"})
+  }
+})
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
+// UPDATE admin
+app.put('/admin/:id', adminOnly, async(c) => {
+  const userId = Number (c.req.param('id'));
+  const {username, password, role} = await c.req.json();
+
+  if (!username && !password && !role) {
+    return c.json({error: "Username, Password atau Role tidak diisi"});
+  }
+  const updateData: any = {};
+  if (username) updateData.username = username;
+  if (password) updateData.password = password;
+  if (role) updateData.role = role;
+
+  try {
+    const updateUser = await prisma.users.update({
+      where: {id: userId},
+      data: updateData
+    });
+    return c.json(updateUser, 200);
+  } catch (error) {
+    console.error(error);
+    return c.json({error: "Tidak bisa mengubah data"})
+  }
+})
+
+// UPDATE users
+app.put('/users/:id', async (c: HonoContext) => {
+  const id = Number(c.req.param('id'));
+  try {
+    const {username, password, role} = await c.req.json();
+    const updateUser = await prisma.users.update({
+      where: {id},
+      data: {username, password, role,}
+    });
+    return c.json(updateUser, 200);
+  } catch (error) {
+    console.error(error);
+    return c.json({error: "Tidak bisa mengubah data"}, 400);
+  }
+});
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
+// DELETE admin
+app.delete('/admin/:id', adminOnly, async(c) => {
+  const userId = Number(c.req.param('id'));
+  try {
+    const deleteAdmin = await prisma.users.delete({
+      where: {id: userId},
+    });
+    return c.json({message: "Penghapusan berhasil", deleteAdmin}, 200);
+  } catch (error) {
+    console.error(error)
+    return c.json({error: "Penghapusan gagal"}, 500);
+  }
+})
+
+// DELETE users
+app.delete('/users/:id', async (c: HonoContext) => {
+  const id = Number(c.req.param('id'));
+  try {
+    await prisma.users.delete({
+      where: {id},
+    });
+    return c.json({message: "Penghapusan berhasil"}, 200);
+  } catch (error) {
+    console.error(error);
+    return c.json({error: "Penghapusan gagal"}, 400);
+  }
+});
+
+// ===================================================================================================================================================================================================== //
+
+
 //======================================================= ROLE =======================================================//
 // CREATE
 
@@ -602,20 +761,5 @@ app.delete('/mapelJurusan/:id', async (c) => {
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
 // DELETE
-
-
-//======================================================= USERS =======================================================//
-// CREATE
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
-// READ
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
-// UPDATE
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
-// DELETE
-
-// ===================================================================================================================================================================================================== //
 
 export default app
