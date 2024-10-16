@@ -58,11 +58,14 @@ model StudentProfil {
 
 model Keuangan {
   id              Int             @id @default(autoincrement())
-  lastBalance     Float
-  lastTransaction Float
   lastTransDate   DateTime
-  studentProfilId Int
+  referensi       String          @default("")
+  noJurnal        String          @default("")
   deskripsi       String
+  studentProfilId Int
+  debit           Float           @default(0)
+  kredit          Float           @default(0)
+  total           Float           @default(0)
   studentProfil   StudentProfil[] @relation
 }
 

@@ -171,10 +171,10 @@ app.delete('/academicYear/:id', async (c) => {
 //======================================================= KEUANGAN =======================================================//
 // CREATE
 app.post('/keuangan', async (c) => {
-  const { lastBalance, lastTransaction, lastTransDate, studentProfilId, deskripsi} = await c.req.json();
+  const { referensi, noJurnal, debit, kredit, total, lastTransDate, studentProfilId, deskripsi} = await c.req.json();
   try {
     const newKeuangan = await prisma.keuangan.create ({
-      data: { lastBalance, lastTransaction, lastTransDate: new Date(lastTransDate), studentProfilId, deskripsi}
+      data: { referensi, noJurnal, debit, kredit, total, lastTransDate: new Date(lastTransDate), studentProfilId, deskripsi}
     })
     return c.json(newKeuangan, 201);
   } catch (error) {
@@ -215,11 +215,11 @@ app.get('/keuangan/:id', async (c) => {
 // UPDATE
 app.put ('/keuangan/:id', async (c) => {
   const id = Number(c.req.param('id'));
-  const {lastBalance, lastTransaction, lastTransDate, studentProfilId, deskripsi} = await c.req.json();
+  const { referensi, noJurnal, debit, kredit, total, lastTransDate, studentProfilId, deskripsi} = await c.req.json();
   try {
     const updateKeuangan = await prisma.keuangan.update({
       where: {id},
-      data: {lastBalance, lastTransaction, lastTransDate: new Date (lastTransDate), studentProfilId, deskripsi}
+      data: { referensi, noJurnal, debit, kredit, total, lastTransDate: new Date (lastTransDate), studentProfilId, deskripsi}
     });
     return c.json(updateKeuangan);
   } catch (error) {
