@@ -4,8 +4,16 @@ import { connect } from 'bun';
 import { Hono, Next } from 'hono'
 import { Context, useId } from 'hono/jsx';
 import type { Context as HonoContext } from 'hono';
+import {cors} from 'hono/cors'
+
 
 const app = new Hono()
+
+app.use(
+  cors({
+    origin: ['http://localhost:3000'],
+  })
+)
 
 // ===================================================================================================================================================================================================== //
 //======================================================= MIDDLEWARE ADMIN ONLY =======================================================//
