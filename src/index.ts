@@ -31,11 +31,11 @@ const adminOnly = async (c: HonoContext, next: Next) => {
 //======================================================= STUDENT PROFIL =======================================================//
 // CREATE
 app.post('/studentProfil', async (c) => {
-  const {foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear} = await c.req.json();
+  const {foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl, agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear} = await c.req.json();
 
   try {
     const newProfil = await prisma.studentProfil.create ({
-      data: { foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl: new Date(ttl), noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear: {connect: {id: academicYear.toString()}}}
+      data: { foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl: new Date(ttl), agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear: {connect: {id: academicYear.toString()}}}
     })
     return c.json(newProfil, 201);
   } catch (error) {
@@ -75,11 +75,11 @@ app.get('/studentProfil/:id', async (c) => {
 // UPDATE 
 app.put ('/studentProfil/:id', async (c) => {
   const id = Number(c.req.param('id'));
-  const { foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear} = await c.req.json();
+  const { foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl, agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear} = await c.req.json();
   try {
     const updateStudentProfil = await prisma.studentProfil.update({
       where: {id},
-      data: {foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl: new Date (ttl), noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear: {connect: {id: academicYear}}}
+      data: {foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl: new Date (ttl), agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear: {connect: {id: academicYear}}}
     });
     return c.json(updateStudentProfil);
   } catch (error) {
@@ -421,16 +421,16 @@ app.get('/pencapaian', async (c) => {
   }
 });
 // READ one
-app.get('/pencapaian/:id', async (c) => {
-  const id = Number (c.req.param('id'));
+app.get('/pencapaian/:studentId', async (c) => {
+  const studentId = Number (c.req.param('studentId'));
   try {
-    const pencapaian = await prisma.pencapaian.findUnique({
-      where: {id}
+    const pencapaian = await prisma.pencapaian.findMany({
+      where: {studentProfilId: studentId}
     });
-    if (pencapaian) {
+    if (pencapaian.length > 0) {
       return c.json(pencapaian)
     } else {
-      return c.json ({error: "Error membaca data"}, 500)
+      return c.json ({message: "Belum terlihat Pencapaian.. Tetap Semangat dan Jangan Menyerah! :)"}, 500)
     }
   } catch (error) {
     return c.json({error: "Error membaca data"}, 500)

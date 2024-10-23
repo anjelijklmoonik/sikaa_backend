@@ -39,13 +39,15 @@ model StudentProfil {
   noTelpIbu      String?
   namaWali       String?
   noTelpWali     String?
+  jenisKelamin   String
+  agama          String?
   keuanganId     Int?           @unique
   keuangan       Keuangan?      @relation(fields: [keuanganId], references: [id])
   absensi        Absensi?       @relation(fields: [absensiId], references: [id])
   absensiId      Int?           @unique
   nilaiId        Int?           @unique
   nilai          Nilai?         @relation(fields: [nilaiId], references: [id])
-  pencapaian     Pencapaian?    @relation(fields: [pencapaianId], references: [id])
+  pencapaian     Pencapaian[]
   pencapaianId   Int?           @unique
   mapelUmum      MapelUmum[]
   mapelJurusan   MapelJurusan[]
@@ -59,8 +61,8 @@ model StudentProfil {
 model Keuangan {
   id              Int             @id @default(autoincrement())
   lastTransDate   DateTime
-  referensi       String          @default("")
-  noJurnal        String          @default("")
+  referensi       String
+  noJurnal        String
   deskripsi       String
   studentProfilId Int
   debit           Float           @default(0)
@@ -106,11 +108,11 @@ model Nilai {
 //---------------------------------------------------------------------------------------------------------------//
 
 model Pencapaian {
-  id              Int             @id @default(autoincrement())
+  id              Int           @id @default(autoincrement())
   judul           String
   deskripsi       String
   tanggal         DateTime
-  studentProfil   StudentProfil[] @relation
+  studentProfil   StudentProfil @relation(fields: [studentProfilId], references: [id])
   studentProfilId Int
 }
 
