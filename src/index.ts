@@ -1,11 +1,10 @@
 const prisma = new PrismaClient
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient, Role, Prisma } from '@prisma/client';
 import { connect } from 'bun';
 import { Hono, Next } from 'hono'
 import { Context, useId } from 'hono/jsx';
 import type { Context as HonoContext } from 'hono';
 import {cors} from 'hono/cors'
-
 
 const app = new Hono()
 
@@ -31,11 +30,18 @@ const adminOnly = async (c: HonoContext, next: Next) => {
 //======================================================= STUDENT PROFIL =======================================================//
 // CREATE
 app.post('/studentProfil', async (c) => {
-  const {foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl, agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear} = await c.req.json();
+  const {foto, nama, noIndukSiswa, sekolah, kelas, Jurusan, alamat, ttl, agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear} = await c.req.json();
 
   try {
     const newProfil = await prisma.studentProfil.create ({
-      data: { foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl: new Date(ttl), agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear: {connect: {id: academicYear.toString()}}}
+      data: { foto, nama, noIndukSiswa, sekolah, kelas, Jurusan, alamat, ttl: new Date(ttl), agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear: {connect: {id: academicYear.toString()}}, Keuangan: {
+        create: {
+          lastTransDate: new Date(),
+          debit: 0,
+          kredit: 0,
+          total: 0,
+        }
+      }}
     })
     return c.json(newProfil, 201);
   } catch (error) {
@@ -75,11 +81,11 @@ app.get('/studentProfil/:id', async (c) => {
 // UPDATE 
 app.put ('/studentProfil/:id', async (c) => {
   const id = Number(c.req.param('id'));
-  const { foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl, agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear} = await c.req.json();
+  const { foto, nama, noIndukSiswa, sekolah, kelas, Jurusan, alamat, ttl, agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear} = await c.req.json();
   try {
     const updateStudentProfil = await prisma.studentProfil.update({
       where: {id},
-      data: {foto, nama, noIndukSiswa, sekolah, kelas, jurusan, alamat, ttl: new Date (ttl), agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear: {connect: {id: academicYear}}}
+      data: {foto, nama, noIndukSiswa, sekolah, kelas, Jurusan, alamat, ttl: new Date (ttl), agama, jenisKelamin, noTelp, email, namaAyah, namaIbu, noTelpAyah, noTelpIbu, namaWali, noTelpWali, academicYear: {connect: {id: academicYear}}}
     });
     return c.json(updateStudentProfil);
   } catch (error) {
@@ -177,20 +183,6 @@ app.delete('/academicYear/:id', async (c) => {
 });
 
 //======================================================= KEUANGAN =======================================================//
-// CREATE
-app.post('/keuangan', async (c) => {
-  const { referensi, noJurnal, debit, kredit, total, lastTransDate, studentProfilId, deskripsi} = await c.req.json();
-  try {
-    const newKeuangan = await prisma.keuangan.create ({
-      data: { referensi, noJurnal, debit, kredit, total, lastTransDate: new Date(lastTransDate), studentProfilId, deskripsi}
-    })
-    return c.json(newKeuangan, 201);
-  } catch (error) {
-    console.error(error)
-    return c.json({error: "Keuangan baru tidak bisa dibuat"}, 400);
-  }
-});
-
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
 // READ all
@@ -221,19 +213,19 @@ app.get('/keuangan/:id', async (c) => {
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
 // UPDATE
-app.put ('/keuangan/:id', async (c) => {
-  const id = Number(c.req.param('id'));
-  const { referensi, noJurnal, debit, kredit, total, lastTransDate, studentProfilId, deskripsi} = await c.req.json();
-  try {
-    const updateKeuangan = await prisma.keuangan.update({
-      where: {id},
-      data: { referensi, noJurnal, debit, kredit, total, lastTransDate: new Date (lastTransDate), studentProfilId, deskripsi}
-    });
-    return c.json(updateKeuangan);
-  } catch (error) {
-    return c.json({error: "Tidak bisa mengubah data"}, 400)
-  }
-});
+// app.put ('/keuangan/:id', async (c) => {
+//   const id = Number(c.req.param('id'));
+//   const { debit, kredit, total, lastTransDate, studentProfilId, deskripsi} = await c.req.json();
+//   try {
+//     const updateKeuangan = await prisma.keuangan.update({
+//       where: {id},
+//       data: { debit, kredit, total, lastTransDate: new Date (lastTransDate), studentProfilId, deskripsi}
+//     });
+//     return c.json(updateKeuangan);
+//   } catch (error) {
+//     return c.json({error: "Tidak bisa mengubah data"}, 400)
+//   }
+// });
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
 // DELETE
@@ -250,13 +242,46 @@ app.delete('/keuangan/:id', async (c) => {
 });
 
 
+// ======================================================== TRANSAKSI =======================================================//
+app.post('/keuangan/:id/transaksi', async (c) => {
+  try {
+    const payload: Prisma.TransaksiCreateInput = await c.req.json()
+    const data = await prisma.$transaction(async prisma => {
+      const transaksi = await prisma.transaksi.create({
+        data: payload,
+        include: {
+          Keuangan: true
+        }
+      })
+
+      const keuanganPayload: Prisma.KeuanganUpdateInput = {
+        debit: transaksi.type === 'DEBIT' ? transaksi.Keuangan.debit + transaksi.amount : transaksi.Keuangan.debit,
+        kredit: transaksi.type === 'KREDIT' ? transaksi.Keuangan.kredit + transaksi.amount : transaksi.Keuangan.kredit,
+        lastTransDate: transaksi.transDate,
+        total: transaksi.type === 'KREDIT' ? transaksi.Keuangan.total + transaksi.amount : transaksi.Keuangan.total - transaksi.amount,
+      }
+
+      const keuangan = await prisma.keuangan.update({
+        where: {id: transaksi.keuanganId},
+        data: keuanganPayload
+      })
+
+      return {transaksi, keuangan}
+    })
+    return c.json({message: 'Transaksi berhasil dibuat', data})
+  } catch (error) {
+    return c.json ({error: "Pengahapusan gagal"}, 400)
+  }
+})
+
+
 //======================================================= ABSENSI =======================================================//
 // CREATE
 app.post('/absensi', async (c) => {
-  const { tanggal, status, studentProfilId} = await c.req.json();
+  const { tanggal, status, studentId, memberKelasId} = await c.req.json();
   try {
     const newAbsen = await prisma.absensi.create ({
-      data: { tanggal: new Date(tanggal), status, studentProfilId}
+      data: { tanggal: new Date(tanggal), status, studentId, memberKelasId}
     })
     return c.json(newAbsen, 201);
   } catch (error) {
@@ -296,11 +321,11 @@ app.get('/absensi/:id', async (c) => {
 // UPDATE
 app.put ('/absensi/:id', async (c) => {
   const id = Number(c.req.param('id'));
-  const { tanggal, status, studentProfilId} = await c.req.json();
+  const { tanggal, status, studentId, memberKelasId} = await c.req.json();
   try {
     const updateAbsensi = await prisma.absensi.update({
       where: {id},
-      data: { tanggal: new Date(tanggal), status, studentProfilId}
+      data: { tanggal: new Date(tanggal), status, studentId, memberKelasId}
     });
     return c.json(updateAbsensi);
   } catch (error) {
@@ -326,10 +351,10 @@ app.delete('/absensi/:id', async (c) => {
 //======================================================= NILAI =======================================================//
 // CREATE
 app.post('/nilai', async (c) => {
-  const { skor, pelajaran, studentProfilId} = await c.req.json();
+  const { skor, pelajaran, studentId, memberKelasId} = await c.req.json();
   try {
     const newNilai = await prisma.nilai.create ({
-      data: { skor, pelajaran, studentProfilId}
+      data: { skor, pelajaran, studentId, memberKelasId}
     })
     return c.json(newNilai, 201);
   } catch (error) {
@@ -369,11 +394,11 @@ app.get('/nilai/:id', async (c) => {
 // UPDATE
 app.put('/nilai/:id', async (c) => {
   const id = Number(c.req.param('id'));
-  const { skor, pelajaran, studentProfilId} = await c.req.json();
+  const { skor, pelajaran, studentId, memberKelasId} = await c.req.json();
   try {
     const updateNilai = await prisma.nilai.update({
       where: {id},
-      data: { skor, pelajaran, studentProfilId}
+      data: { skor, pelajaran, studentId, memberKelasId}
     });
     return c.json(updateNilai);
   } catch (error) {
@@ -467,14 +492,41 @@ app.delete('/pencapaian/:id', async (c) => {
   }
 });
 
+//======================================================= MAPEL =======================================================//
+// CREATE
+app.post('/mapel', async (c) => {
+  const {type, mapelUmumId, mapelJurusanId} = await c.req.json();
+  try {
+    const newMapel = await prisma.mapel.create({
+      data: {type, mapelUmumId, mapelJurusanId}
+    })
+    return c.json(newMapel, 201)
+  } catch (error) {
+    console.error(error)
+    return c.json({error: "Gagal membuat Mata Pelajaran"}, 400)
+  }
+})
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
+// READ ALL
+app.get('/mapel', async (c) => {
+  try {
+    const mapel = await prisma.mapel.findMany();
+    return c.json(mapel);
+  } catch (error) {
+    return c.json({error: "Mata pelajaran tidak terbaca"}, 500)
+  }
+})
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ //
+
 
 //======================================================= MAPEL UMUM =======================================================//
 // CREATE
 app.post('/mapelUmum', async (c) => {
-  const { namaMapel, studentProfilId} = await c.req.json();
+  const { namaMapel} = await c.req.json();
   try {
     const newMapelUmum = await prisma.mapelUmum.create({
-      data: { namaMapel, studentProfilId}
+      data: { namaMapel}
     });
     return c.json(newMapelUmum, 201);
   } catch (error) {
@@ -514,11 +566,11 @@ app.get('/mapelUmum/:id', async (c) => {
 // UPDATE
 app.put('/mapelUmum/:id', async (c) => {
   const id = Number(c.req.param('id'));
-  const { namaMapel, studentProfilId} = await c.req.json();
+  const { namaMapel} = await c.req.json();
   try {
     const updateMapelUmum = await prisma.mapelUmum.update({
       where: {id},
-      data: { namaMapel, studentProfilId}
+      data: { namaMapel}
     });
     return c.json(updateMapelUmum);
   } catch (error) {
@@ -544,10 +596,10 @@ app.delete('/mapelUmum/:id', async (c) => {
 //======================================================= MAPEL JURUSAN =======================================================//
 // CREATE
 app.post('/mapelJurusan', async (c) => {
-  const { namaMapel, studentProfilId} = await c.req.json();
+  const { namaMapel, jurusanId} = await c.req.json();
   try {
     const newMapelJurusan = await prisma.mapelJurusan.create({
-      data: { namaMapel, studentProfilId}
+      data: { namaMapel, jurusanId}
     });
     return c.json(newMapelJurusan, 201);
   } catch (error) {
@@ -586,11 +638,11 @@ app.get('/mapelJurusan/:id', async (c) => {
 // UPDATE
 app.put('/mapelJurusan/:id', async (c) => {
   const id = Number(c.req.param('id'));
-  const {namaMapel, studentProfilId} = await c.req.json();
+  const {namaMapel, jurusanId} = await c.req.json();
   try {
     const updateMapelJurusan = await prisma.mapelJurusan.update({
       where: {id},
-      data: {namaMapel, studentProfilId}
+      data: {namaMapel, jurusanId}
     });
     return c.json(updateMapelJurusan);
   } catch (error) {

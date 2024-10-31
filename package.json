@@ -2,7 +2,8 @@
   "name": "sikaa-backend",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "migrate": "bunx prisma migrate dev"
+    "migrate": "bunx prisma migrate dev",
+    "migrate:reset": "bunx prisma migrate reset"
   },
   "dependencies": {
     "@prisma/client": "^5.19.1",

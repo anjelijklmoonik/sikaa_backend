@@ -17,22 +17,24 @@ model AcademicYear {
   id            String          @id @default(uuid())
   year          Int
   StudentProfil StudentProfil[]
+  Kelas         Kelas[]
 }
 
 //---------------------------------------------------------------------------------------------------------------//
 
 model StudentProfil {
-  id             Int            @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   foto           String?
   nama           String
-  noIndukSiswa   String         @unique
+  noIndukSiswa   String        @unique
   sekolah        String
   kelas          String
-  jurusan        String
+  jurusanId      Int
+  Jurusan        Jurusan       @relation(fields: [jurusanId], references: [id])
   alamat         String
   ttl            DateTime
   noTelp         String?
-  email          String?        @unique
+  email          String?       @unique
   namaAyah       String?
   namaIbu        String?
   noTelpAyah     String?
@@ -41,68 +43,102 @@ model StudentProfil {
   noTelpWali     String?
   jenisKelamin   String
   agama          String?
-  keuanganId     Int?           @unique
-  keuangan       Keuangan?      @relation(fields: [keuanganId], references: [id])
-  absensi        Absensi?       @relation(fields: [absensiId], references: [id])
-  absensiId      Int?           @unique
-  nilaiId        Int?           @unique
-  nilai          Nilai?         @relation(fields: [nilaiId], references: [id])
   pencapaian     Pencapaian[]
-  pencapaianId   Int?           @unique
-  mapelUmum      MapelUmum[]
-  mapelJurusan   MapelJurusan[]
   users          Users[]
   academicYearId String?
-  academicYear   AcademicYear?  @relation(fields: [academicYearId], references: [id])
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id])
+  Keuangan       Keuangan?
+  MemberKelas    MemberKelas[]
+  Nilai          Nilai[]
+  Absensi        Absensi[]
+}
+
+model Jurusan {
+  id            Int             @id() @default(autoincrement())
+  nama          String
+  deskripsi     String?
+  Kelas         Kelas[]
+  MapelJurusan  MapelJurusan[]
+  StudentProfil StudentProfil[]
+}
+
+model Kelas {
+  id             Int           @id @default(autoincrement())
+  noKelas        String
+  academicYearId String
+  AcademicYear   AcademicYear  @relation(fields: [academicYearId], references: [id])
+  semester       SemesterType
+  jurusanId      Int
+  Jurusan        Jurusan       @relation(fields: [jurusanId], references: [id])
+  MemberKelas    MemberKelas[]
+  mapelId        Int
+  Mapel          Mapel         @relation(fields: [mapelId], references: [id])
+
+  @@unique([noKelas, academicYearId, semester, jurusanId])
+}
+
+model MemberKelas {
+  id            Int           @id @default(autoincrement())
+  kelasId       Int
+  Kelas         Kelas         @relation(fields: [kelasId], references: [id])
+  studentId     Int
+  StudentProfil StudentProfil @relation(fields: [studentId], references: [id])
+  Nilai         Nilai[]
+  Absensi       Absensi[]
+
+  @@unique([kelasId, studentId])
 }
 
 //---------------------------------------------------------------------------------------------------------------//
 
 model Keuangan {
-  id              Int             @id @default(autoincrement())
-  lastTransDate   DateTime
-  referensi       String
-  noJurnal        String
-  deskripsi       String
-  studentProfilId Int
-  debit           Float           @default(0)
-  kredit          Float           @default(0)
-  total           Float           @default(0)
-  studentProfil   StudentProfil[] @relation
+  id            Int           @id @default(autoincrement())
+  lastTransDate DateTime
+  debit         Float         @default(0)
+  kredit        Float         @default(0)
+  total         Float         @default(0)
+  studentId     Int           @unique
+  StudentProfil StudentProfil @relation(fields: [studentId], references: [id])
+  Transaksi     Transaksi[]
 }
 
 //---------------------------------------------------------------------------------------------------------------//
 
-// model Transaksi {
-//   id              Int            @id @default(autoincrement())
-//   keuanganId      Int
-//   amount          Int
-//   type            String
-//   lastBalance     Int
-//   deskripsi       String
-//   transDate       DateTime
-//   StudentProfil   StudentProfil? @relation(fields: [studentProfilId], references: [id])
-//   studentProfilId Int?
-// }
+model Transaksi {
+  id          Int             @id @default(autoincrement())
+  amount      Int
+  referensi   String
+  noJurnal    String
+  type        TransactionType
+  lastBalance Int
+  deskripsi   String
+  transDate   DateTime
+  keuanganId  Int
+  Keuangan    Keuangan        @relation(fields: [keuanganId], references: [id])
+}
 
 //---------------------------------------------------------------------------------------------------------------//
 
 model Absensi {
-  id              Int             @id @default(autoincrement())
-  tanggal         DateTime
-  status          String
-  studentProfil   StudentProfil[] @relation
-  studentProfilId Int?
+  id            Int           @id @default(autoincrement())
+  tanggal       DateTime
+  status        String
+  memberKelasId Int
+  MemberKelas   MemberKelas   @relation(fields: [memberKelasId], references: [id])
+  studentId     Int
+  StudentProfil StudentProfil @relation(fields: [studentId], references: [id])
 }
 
 //---------------------------------------------------------------------------------------------------------------//
 
 model Nilai {
-  id              Int             @id @default(autoincrement())
-  skor            Float
-  pelajaran       String
-  studentProfil   StudentProfil[] @relation
-  studentProfilId Int
+  id            Int           @id @default(autoincrement())
+  skor          Float
+  pelajaran     String
+  memberKelasId Int
+  MemberKelas   MemberKelas   @relation(fields: [memberKelasId], references: [id])
+  studentId     Int
+  StudentProfil StudentProfil @relation(fields: [studentId], references: [id])
 }
 
 //---------------------------------------------------------------------------------------------------------------//
@@ -116,29 +152,34 @@ model Pencapaian {
   studentProfilId Int
 }
 
+model Mapel {
+  id             Int           @id @default(autoincrement())
+  type           MapelType
+  mapelUmumId    Int?
+  MapelUmum      MapelUmum?    @relation(fields: [mapelUmumId], references: [id])
+  mapelJurusanId Int?
+  MapelJurusan   MapelJurusan? @relation(fields: [mapelJurusanId], references: [id])
+  Kelas          Kelas[]
+}
+
 //---------------------------------------------------------------------------------------------------------------//
 
 model MapelUmum {
-  id              Int            @id @default(autoincrement())
-  namaMapel       String
-  StudentProfil   StudentProfil? @relation(fields: [studentProfilId], references: [id])
-  studentProfilId Int
+  id        Int     @id @default(autoincrement())
+  namaMapel String
+  Mapel     Mapel[]
 }
 
 //---------------------------------------------------------------------------------------------------------------//
 model MapelJurusan {
-  id              Int            @id @default(autoincrement())
-  namaMapel       String
-  StudentProfil   StudentProfil? @relation(fields: [studentProfilId], references: [id])
-  studentProfilId Int
+  id        Int     @id @default(autoincrement())
+  namaMapel String
+  jurusanId Int
+  Jurusan   Jurusan @relation(fields: [jurusanId], references: [id])
+  Mapel     Mapel[]
 }
 
 //---------------------------------------------------------------------------------------------------------------//
-enum Role {
-  STUDENT
-  ADMIN
-  ORANGTUA
-}
 
 model Users {
   id              Int            @id @default(autoincrement())
@@ -147,4 +188,25 @@ model Users {
   studentProfilId Int?
   studentProfil   StudentProfil? @relation(fields: [studentProfilId], references: [id])
   role            Role?
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  ORANGTUA
+}
+
+enum TransactionType {
+  DEBIT
+  KREDIT
+}
+
+enum SemesterType {
+  GANJIL
+  GENAP
+}
+
+enum MapelType {
+  UMUM
+  JURUSAN
 }
