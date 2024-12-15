@@ -8,6 +8,8 @@ import pencapaian from "./pencapaianService";
 import mapel from "./mapelService";
 import user from "./userService";
 import admin from "./adminService";
+import auth from "./authService";
+import nilai from "./nilaiService";
 
 const app = new Hono();
 
@@ -17,6 +19,7 @@ app.use(
   })
 );
 
+app.route("", auth);
 app.route("", studentProfile);
 app.route("", academicYear);
 app.route("", keuangan);
@@ -25,6 +28,7 @@ app.route("", pencapaian);
 app.route("", mapel);
 app.route("", user);
 app.route("", admin);
+app.route("", nilai);
 
 export default {
   port: 3001,

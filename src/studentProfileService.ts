@@ -37,7 +37,7 @@ studentProfile.post("/studentProfil", async (c) => {
         kelas,
         Jurusan,
         alamat,
-        ttl: new Date(ttl),
+        ttl,
         agama,
         jenisKelamin,
         noTelp,
@@ -82,6 +82,7 @@ studentProfile.get("/studentProfil/:id", async (c) => {
   try {
     const studentProfil = await prisma.studentProfil.findUnique({
       where: { id },
+      include: { Jurusan: true },
     });
     if (studentProfil) {
       return c.json(studentProfil);
@@ -128,7 +129,7 @@ studentProfile.put("/studentProfil/:id", async (c) => {
         kelas,
         Jurusan,
         alamat,
-        ttl: new Date(ttl),
+        ttl,
         agama,
         jenisKelamin,
         noTelp,

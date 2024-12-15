@@ -3,11 +3,17 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "migrate": "bunx prisma migrate dev",
-    "migrate:reset": "bunx prisma migrate reset"
+    "migrate:reset": "bunx prisma migrate reset",
+    "db:seed": "bunx prisma db seed"
+  },
+  "prisma": {
+    "seed": "bun prisma/seed.ts"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.4.2",
     "@prisma/client": "^5.19.1",
-    "hono": "^4.6.2"
+    "hono": "^4.6.2",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/bun": "latest",

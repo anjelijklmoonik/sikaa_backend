@@ -32,7 +32,7 @@ model StudentProfil {
   jurusanId      Int
   Jurusan        Jurusan       @relation(fields: [jurusanId], references: [id])
   alamat         String
-  ttl            DateTime
+  ttl            String
   noTelp         String?
   email          String?       @unique
   namaAyah       String?
@@ -49,7 +49,6 @@ model StudentProfil {
   academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id])
   Keuangan       Keuangan?
   MemberKelas    MemberKelas[]
-  Nilai          Nilai[]
   Absensi        Absensi[]
 }
 
@@ -58,8 +57,8 @@ model Jurusan {
   nama          String
   deskripsi     String?
   Kelas         Kelas[]
-  MapelJurusan  MapelJurusan[]
   StudentProfil StudentProfil[]
+  Mapel         Mapel[]
 }
 
 model Kelas {
@@ -71,10 +70,18 @@ model Kelas {
   jurusanId      Int
   Jurusan        Jurusan       @relation(fields: [jurusanId], references: [id])
   MemberKelas    MemberKelas[]
-  mapelId        Int
-  Mapel          Mapel         @relation(fields: [mapelId], references: [id])
+  MapelKelas     MapelKelas[]
 
   @@unique([noKelas, academicYearId, semester, jurusanId])
+}
+
+model MapelKelas {
+  mapelId Int
+  Mapel   Mapel @relation(fields: [mapelId], references: [id])
+  kelasId Int
+  kelas   Kelas @relation(fields: [kelasId], references: [id])
+
+  @@unique([mapelId, kelasId])
 }
 
 model MemberKelas {
@@ -132,13 +139,11 @@ model Absensi {
 //---------------------------------------------------------------------------------------------------------------//
 
 model Nilai {
-  id            Int           @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   skor          Float
   pelajaran     String
   memberKelasId Int
-  MemberKelas   MemberKelas   @relation(fields: [memberKelasId], references: [id])
-  studentId     Int
-  StudentProfil StudentProfil @relation(fields: [studentId], references: [id])
+  MemberKelas   MemberKelas @relation(fields: [memberKelasId], references: [id])
 }
 
 //---------------------------------------------------------------------------------------------------------------//
@@ -153,37 +158,19 @@ model Pencapaian {
 }
 
 model Mapel {
-  id             Int           @id @default(autoincrement())
-  type           MapelType
-  mapelUmumId    Int?
-  MapelUmum      MapelUmum?    @relation(fields: [mapelUmumId], references: [id])
-  mapelJurusanId Int?
-  MapelJurusan   MapelJurusan? @relation(fields: [mapelJurusanId], references: [id])
-  Kelas          Kelas[]
-}
-
-//---------------------------------------------------------------------------------------------------------------//
-
-model MapelUmum {
-  id        Int     @id @default(autoincrement())
-  namaMapel String
-  Mapel     Mapel[]
-}
-
-//---------------------------------------------------------------------------------------------------------------//
-model MapelJurusan {
-  id        Int     @id @default(autoincrement())
-  namaMapel String
-  jurusanId Int
-  Jurusan   Jurusan @relation(fields: [jurusanId], references: [id])
-  Mapel     Mapel[]
+  id         Int          @id @default(autoincrement())
+  type       MapelType
+  namaMapel  String
+  jurusanId  Int?
+  Jurusan    Jurusan?     @relation(fields: [jurusanId], references: [id])
+  MapelKelas MapelKelas[]
 }
 
 //---------------------------------------------------------------------------------------------------------------//
 
 model Users {
   id              Int            @id @default(autoincrement())
-  username        String
+  username        String         @unique
   password        String
   studentProfilId Int?
   studentProfil   StudentProfil? @relation(fields: [studentProfilId], references: [id])
