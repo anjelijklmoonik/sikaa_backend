@@ -1,0 +1,84 @@
+PROJECT SIKAA (KLABAT ADVENTIST ACADEMY)
+
+* LOGIN:
+- Role Siswa
+- Role Orang Tua
+- Role Admin
+note: untuk role siswa dan orang tua cara kerjanya sama
+
+Untuk login sebagai siswa atau orang tua akan ke page home dan terdapat sidebar untuk navigasi ke masing-masing page yang bisa diakses oleh baik siswa maupun orang tua dari siswa tertentu yang ingin mengecek/ memantau status sekolah dari anaknya masing-masing.
+* HOME:
+- Isi Visi dan Misi Sekolah
+- Page Static
+
+* PROFIL SISWA:
+data yang harus ada isi:
+- Nama
+- Nomor Induk Siswa
+- Sekolah
+- Kelas
+- Jurusan
+- Alamat
+- Tempat / Tanggal Lahir
+- Agama
+- Jenis Kelamin
+- No Telp
+data yang bisa saja kosong:
+- Nama Ayah
+- Nama Ibu
+- No Telp Ayah
+- No Telp Ibu
+- Nama Wali
+- No Telp Wali
+- Foto
+note: untuk sekolah ada SMA & SMK, dimana SMA tidak memiliki jurusan dan SMK memiliki jurusan keperawatan dan bisnis ekonomi
+
+KEUANGAN:
+- Tanggal
+- Debit
+- Kredit
+- Deskripsi
+- Total Keseluruhan
+untuk tambahan bagian transaksi:
+- Referensi
+- No Jurnal
+
+NILAI:
+bagian absen akan dibagi persemester, jika dari kelas 10 berarti akan ada 6 semester atau semester ganjil/genap dari masing-masing tahun ajaran
+- Mata Pelajaran
+- Nilai MP
+
+PENCAPAIAN:
+setiap siswa dapat melihat apakah dia mempunyai pencapaian selama Waktu bersekolah (juara kelas, juara lomba, dll)
+- Judul
+- Tanggal
+- Deskripsi
+
+ABSEN:
+bagian absen akan dibagi persemester, jika dari kelas 10 berarti akan ada 6 semester atau semester ganjil/genap dari masing-masing tahun ajaran
+bagian absen mata pelajaran:
+- Tanggal
+- Nama MP
+- Keterangan (tidak hadir, izin, sakit)
+bagian absen untuk ibadah chapel:
+- Tanggal Chapel
+- Keterangan (tidak hadir, izin, sakit)
+
+INFORMASI:
+- Berisi informasi yang berhubungan dengan sekolah (biaya, aturan, dll)
+- Page static
+
+
+Untuk login sebagai admin akan ke page home admin (mungkin page home yang sama dengan page home untuk role siswa dan orang tua) dan terdapat sidebar untuk navigasi dari masing-masing page untuk pengisian data
+Secara keseluruhan semua page untuk admin ialah:
+- Pilihan SMA / SMA
+- Jika sudah pilih salah satu (SMA/SMK) selanjutnya ada pilihan kelas (untuk case SMA mungkin bisa langsung kelas+jurusan, ex. kelas 10 keperawatan)
+- Jika sudah pilih kelas selanjutnya akan ada daftar nama siswa yang bisa di Kelola untuk ditambahkan data-data pada masing-masing dari page-page diatas untuk siswa (Profil, Keuangan, Nilai, Pencapaian, Absen), dan jika sudah selesai mengelola masing-masing data pada page akan ternavigasi langsung ke page data yang baru dikelola.
+
+Jika sudah selesai menggunakan sistem web app, user dapat melakukan logout dengan menekan tombol logout.
+
+Note pertanyaan:
+- Menurut bang Hoka untuk admin dipisah untuk admin khusus keuangan dan admin khusus input data, atau disatuin aja??
+- Untuk username dan password menurut abang bagusnya bisa diubah dari pihak siswa nggak? Kalo bisa, bisa langsung dari siswanya atau harus lewat admin?
+
+Kalo masih ada yang bingung bisa ditanya ya bang :D

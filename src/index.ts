@@ -10,6 +10,7 @@ import user from "./userService";
 import admin from "./adminService";
 import auth from "./authService";
 import nilai from "./nilaiService";
+import kelas from "./kelasService";
 
 const app = new Hono();
 
@@ -29,6 +30,7 @@ app.route("", mapel);
 app.route("", user);
 app.route("", admin);
 app.route("", nilai);
+app.route("", kelas);
 
 export default {
   port: 3001,
