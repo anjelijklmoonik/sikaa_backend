@@ -1,0 +1,216 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AcademicYear {
+  id            Int             @id @default(autoincrement())
+  year          Int
+  StudentProfil StudentProfil[]
+  Kelas         Kelas[]
+}
+
+//---------------------------------------------------------------------------------------------------------------//
+
+model StudentProfil {
+  id             Int           @id @default(autoincrement())
+  foto           String?
+  nama           String
+  noIndukSiswa   String        @unique
+  sekolah        String
+  kelas          String
+  jurusanId      Int?
+  Jurusan        Jurusan?      @relation(fields: [jurusanId], references: [id])
+  alamat         String
+  ttl            String
+  noTelp         String?
+  email          String?       @unique
+  namaAyah       String?
+  namaIbu        String?
+  noTelpAyah     String?
+  noTelpIbu      String?
+  namaWali       String?
+  noTelpWali     String?
+  jenisKelamin   String
+  agama          String?
+  pencapaian     Pencapaian[]
+  users          Users[]
+  academicYearId Int?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id])
+  Keuangan       Keuangan?
+  MemberKelas    MemberKelas[]
+  Absensi        Absensi[]
+  Nilai          Nilai[]
+}
+
+model Jurusan {
+  id            Int             @id() @default(autoincrement())
+  nama          String
+  deskripsi     String?
+  Kelas         Kelas[]
+  StudentProfil StudentProfil[]
+  Mapel         Mapel[]
+}
+
+model Kelas {
+  id             Int           @id @default(autoincrement())
+  noKelas        String
+  academicYearId Int
+  AcademicYear   AcademicYear  @relation(fields: [academicYearId], references: [id])
+  semester       SemesterType
+  jurusanId      Int
+  Jurusan        Jurusan       @relation(fields: [jurusanId], references: [id])
+  MemberKelas    MemberKelas[]
+  MapelKelas     MapelKelas[]
+
+  @@unique([noKelas, academicYearId, semester, jurusanId])
+}
+
+model MapelKelas {
+  id      Int       @id @default(autoincrement())
+  mapelId Int
+  Mapel   Mapel     @relation(fields: [mapelId], references: [id])
+  kelasId Int
+  kelas   Kelas     @relation(fields: [kelasId], references: [id])
+  nilai   Nilai[]
+  Absensi Absensi[]
+
+  @@unique([mapelId, kelasId])
+}
+
+model MemberKelas {
+  id            Int           @id @default(autoincrement())
+  kelasId       Int
+  Kelas         Kelas         @relation(fields: [kelasId], references: [id])
+  studentId     Int
+  StudentProfil StudentProfil @relation(fields: [studentId], references: [id])
+  Nilai         Nilai[]
+  Absensi       Absensi[]
+
+  @@unique([kelasId, studentId])
+}
+
+//---------------------------------------------------------------------------------------------------------------//
+
+model Keuangan {
+  id            Int           @id @default(autoincrement())
+  lastTransDate DateTime
+  debit         Float         @default(0)
+  kredit        Float         @default(0)
+  total         Float         @default(0)
+  studentId     Int           @unique
+  StudentProfil StudentProfil @relation(fields: [studentId], references: [id])
+  Transaksi     Transaksi[]
+}
+
+//---------------------------------------------------------------------------------------------------------------//
+
+model Transaksi {
+  id         Int             @id @default(autoincrement())
+  amount     Int
+  referensi  String
+  noJurnal   String
+  type       TransactionType
+  // lastBalance Int
+  deskripsi  String
+  transDate  DateTime
+  keuanganId Int
+  Keuangan   Keuangan        @relation(fields: [keuanganId], references: [id])
+}
+
+//---------------------------------------------------------------------------------------------------------------//
+
+model Absensi {
+  id              Int           @id @default(autoincrement())
+  tanggal         DateTime
+  status          String
+  memberKelasId   Int
+  MemberKelas     MemberKelas   @relation(fields: [memberKelasId], references: [id])
+  studentProfilId Int
+  StudentProfil   StudentProfil @relation(fields: [studentProfilId], references: [id])
+  mapelKelasId    Int
+  MapelKelas      MapelKelas    @relation(fields: [mapelKelasId], references: [id])
+}
+
+//---------------------------------------------------------------------------------------------------------------//
+
+model Nilai {
+  id              Int           @id @default(autoincrement())
+  skor            Float
+  mapelKelasId    Int
+  memberKelasId   Int
+  studentProfilId Int
+  MemberKelas     MemberKelas   @relation(fields: [memberKelasId], references: [id])
+  MapelKelas      MapelKelas    @relation(fields: [mapelKelasId], references: [id])
+  StudentProfil   StudentProfil @relation(fields: [studentProfilId], references: [id])
+}
+
+// model Nilai {
+//   id            Int         @id @default(autoincrement())
+//   skor          Float
+//   pelajaran     String
+//   memberKelasId Int
+//   MemberKelas   MemberKelas @relation(fields: [memberKelasId], references: [id])
+// }
+
+//---------------------------------------------------------------------------------------------------------------//
+
+model Pencapaian {
+  id              Int           @id @default(autoincrement())
+  judul           String
+  deskripsi       String
+  tanggal         DateTime
+  studentProfil   StudentProfil @relation(fields: [studentProfilId], references: [id])
+  studentProfilId Int
+}
+
+model Mapel {
+  id         Int          @id @default(autoincrement())
+  type       MapelType
+  namaMapel  String
+  jurusanId  Int?
+  Jurusan    Jurusan?     @relation(fields: [jurusanId], references: [id])
+  MapelKelas MapelKelas[]
+}
+
+//---------------------------------------------------------------------------------------------------------------//
+
+model Users {
+  id              Int            @id @default(autoincrement())
+  username        String         @unique
+  password        String
+  studentProfilId Int?
+  studentProfil   StudentProfil? @relation(fields: [studentProfilId], references: [id])
+  role            Role?
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  ORANGTUA
+}
+
+enum TransactionType {
+  DEBIT
+  KREDIT
+}
+
+enum SemesterType {
+  GANJIL
+  GENAP
+}
+
+enum MapelType {
+  UMUM
+  JURUSAN
+}

@@ -1,0 +1,5 @@
+node_modules/
+compose.yml
+.env
+request.http
+dist/
